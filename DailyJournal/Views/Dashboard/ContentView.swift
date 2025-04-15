@@ -8,12 +8,21 @@
 import SwiftUI
 import SwiftData
 
+struct Mood {
+    var image: String
+    var mood: String
+    var color: Color
+}
+
 struct ContentView: View {
 
     @Binding var username: String
     @State internal var hideMoodView: Bool = false
+    @State private var shouldNavigate = false
+    @State private var selectedIndex: Int = 0
     
-    private let moods: [String] = ["😎", "🙂", "😌", "😐", "😖", "😡", "🙁", "😢"]
+    private let moods: [Mood] = [Mood(image: "😎", mood: "Joyful", color: .green), Mood(image: "🙂", mood: "Happy", color: .yellow), Mood(image: "😌", mood: "Calm", color: .pink), Mood(image: "😐", mood: "Flat", color: .gray), Mood(image: "😖", mood: "Not Good", color: .orange) ,Mood(image: "😡", mood: "Angry", color: .red), Mood(image: "🙁", mood: "Sad", color: .blue), Mood(image: "😢", mood: "Very Sad", color: .blue)]
+    
     private let gridItems: [GridItem] = Array(repeating: GridItem(.flexible()), count: 4)
     private let paddingBottom: CGFloat = UIScreen.main.bounds.height / 30
     
@@ -52,6 +61,11 @@ struct ContentView: View {
                     Spacer()
                 }
                 .padding()
+                .navigationDestination(isPresented: $shouldNavigate) {
+                    JournalLogView(mood: moods[selectedIndex].image,
+                                   moodString: moods[selectedIndex].mood,
+                                   moodColor: moods[selectedIndex].color)
+                }
             }
             .navigationBarBackButtonHidden()
         }
@@ -91,13 +105,14 @@ extension ContentView {
             }
             
             LazyVGrid(columns: gridItems, spacing: 0) {
-                ForEach(moods, id: \.self) { mood in
-                    if let image = mood.emojiToImage() {
+                ForEach(0..<moods.count, id: \.self) { index in
+                    if let image = moods[index].image.emojiToImage() {
                         Image(uiImage: image)
                             .resizable()
                             .frame(width: 60, height: 65)
                             .onTapGesture {
-                                
+                                selectedIndex = index
+                                shouldNavigate = true
                             }
                     }
                 }
@@ -119,7 +134,7 @@ extension ContentView {
             
             VStack(alignment: .leading) {
                 HStack {
-                    if let image = moods[0].emojiToImage() {
+                    if let image = moods[0].image.emojiToImage() {
                         Image(uiImage: image)
                             .resizable()
                             .frame(width: 60, height: 65)
