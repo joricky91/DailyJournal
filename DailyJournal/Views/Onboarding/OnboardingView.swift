@@ -8,10 +8,11 @@
 import SwiftUI
 
 struct OnboardingView: View {
-//    @AppStorage("userName") var userName: String = ""
-//    @AppStorage("hasSeenOnboarding") var hasSeenOnboarding: Bool = false
+    
+    @Binding var username: String
+    @Binding var hasSeenOnboarding: Bool
+    
     @State private var shouldNavigate = false
-    @State private var username: String = ""
     
     var body: some View {
         ZStack {
@@ -60,13 +61,13 @@ struct OnboardingView: View {
                 }
                 .padding()
                 .navigationDestination(isPresented: $shouldNavigate) {
-                    ContentView()
+                    ContentView(username: $username)
                 }
             }
         }
     }
 }
 
-#Preview {
-    OnboardingView()
-}
+//#Preview {
+//    OnboardingView()
+//}

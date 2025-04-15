@@ -10,6 +10,9 @@ import SwiftData
 
 @main
 struct DailyJournalApp: App {
+    @AppStorage("hasSeenOnboarding") var hasSeenOnboarding = false
+    @AppStorage("username") var username = ""
+    
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             User.self,
@@ -25,20 +28,21 @@ struct DailyJournalApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView()
+            RootView(hasSeenOnboarding: $hasSeenOnboarding, username: $username)
         }
         .modelContainer(sharedModelContainer)
     }
 }
 
 struct RootView: View {
-    private let hasSeenOnboarding: Bool = UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
+    @Binding var hasSeenOnboarding: Bool
+    @Binding var username: String
 
     var body: some View {
         if hasSeenOnboarding {
-            ContentView()
+            ContentView(username: $username)
         } else {
-            OnboardingView()
+            OnboardingView(username: $username, hasSeenOnboarding: $hasSeenOnboarding)
         }
     }
 }
