@@ -36,47 +36,24 @@ struct JournalLogView: View {
             .frame(maxWidth: .infinity, maxHeight: UIScreen.main.bounds.height / 3)
             .background(moodColor)
             
-            VStack(alignment: .leading) {
-                Text("Describe your day here")
-                
-                TextEditor(text: $moodDescription)
-                    .frame(height: 120)
-                    .padding(12)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(moodColor, lineWidth: 1)
-                    )
-            }
-            .padding()
+            TextEditorView(title: "Describe yoyr day here",
+                           strokeColor: moodColor,
+                           moodDescription: $moodDescription)
             
             Spacer()
             
-            Button {
+            ButtonView(buttonText: "Save", isTransparent: false) {
                 let newJournal = Journal(mood: mood,
                                          moodName: moodString,
                                          moodDescription: moodDescription,
                                          date: Date())
                 SwiftDataManager.shared.addToLocal(context: modelContext, data: newJournal)
                 dismiss()
-            } label: {
-                Text("Save")
-                    .foregroundColor(Color(.primary))
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.accentColor)
-                    .cornerRadius(8)
             }
-            .padding(.horizontal)
             
-            Button {
+            ButtonView(buttonText: "Cancel", isTransparent: true) {
                 dismiss()
-            } label: {
-                Text("Cancel")
-                    .foregroundColor(.red)
-                    .frame(maxWidth: .infinity)
-                    .padding()
             }
-            .padding(.horizontal)
         }
         .navigationBarBackButtonHidden()
     }
