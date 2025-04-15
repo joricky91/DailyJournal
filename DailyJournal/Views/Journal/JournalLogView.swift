@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct JournalLogView: View {
     var mood: String = "😎"
@@ -15,6 +16,7 @@ struct JournalLogView: View {
     @State private var moodDescription: String = ""
     
     @Environment(\.dismiss) var dismiss
+    @Environment(\.modelContext) private var modelContext
     
     var body: some View {
         VStack {
@@ -50,7 +52,12 @@ struct JournalLogView: View {
             Spacer()
             
             Button {
-                print(moodDescription)
+                let newJournal = Journal(mood: mood,
+                                         moodName: moodString,
+                                         moodDescription: moodDescription,
+                                         date: Date())
+                SwiftDataManager.shared.addToLocal(context: modelContext, data: newJournal)
+                dismiss()
             } label: {
                 Text("Save")
                     .foregroundColor(Color(.primary))

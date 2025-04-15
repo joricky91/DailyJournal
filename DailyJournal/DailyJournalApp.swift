@@ -15,7 +15,7 @@ struct DailyJournalApp: App {
     
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            User.self,
+            Journal.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 

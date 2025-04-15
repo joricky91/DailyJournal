@@ -21,10 +21,14 @@ struct ContentView: View {
     @State private var shouldNavigate = false
     @State private var selectedIndex: Int = 0
     
+    @Environment(\.modelContext) var modelContext
+    
     private let moods: [Mood] = [Mood(image: "😎", mood: "Joyful", color: .green), Mood(image: "🙂", mood: "Happy", color: .yellow), Mood(image: "😌", mood: "Calm", color: .pink), Mood(image: "😐", mood: "Flat", color: .gray), Mood(image: "😖", mood: "Not Good", color: .orange) ,Mood(image: "😡", mood: "Angry", color: .red), Mood(image: "🙁", mood: "Sad", color: .blue), Mood(image: "😢", mood: "Very Sad", color: .blue)]
     
     private let gridItems: [GridItem] = Array(repeating: GridItem(.flexible()), count: 4)
     private let paddingBottom: CGFloat = UIScreen.main.bounds.height / 30
+    
+    @State private var journal: Journal?
     
     var body: some View {
         ZStack {
@@ -68,6 +72,18 @@ struct ContentView: View {
                 }
             }
             .navigationBarBackButtonHidden()
+        }
+        .onAppear {
+            let startOfToday = Calendar.current.startOfDay(for: Date())
+            let startOfTomorrow = Calendar.current.date(byAdding: .day, value: 1, to: startOfToday)!
+
+            let predicate = #Predicate<Journal> {
+                $0.date >= startOfToday && $0.date < startOfTomorrow
+            }
+            
+            journal = SwiftDataManager.shared.fetchOne(context: modelContext, predicate: predicate)
+            
+            if let journal { hideMoodView = true } else { hideMoodView = false }
         }
     }
 }
@@ -127,31 +143,33 @@ extension ContentView {
                 .fontWeight(.bold)
                 .foregroundStyle(Color(.primary))
             
-//                        ContentUnavailableView("No Journal",
-//                                               systemImage: "book.pages",
-//                                               description: Text("You haven't log your journal today! Log it above!"))
-//                        .frame(height: UIScreen.main.bounds.height / 4)
-            
-            VStack(alignment: .leading) {
-                HStack {
-                    if let image = moods[0].image.emojiToImage() {
-                        Image(uiImage: image)
-                            .resizable()
-                            .frame(width: 60, height: 65)
+            if let journal {
+                VStack(alignment: .leading) {
+                    HStack {
+                        if let image = journal.mood.emojiToImage() {
+                            Image(uiImage: image)
+                                .resizable()
+                                .frame(width: 60, height: 65)
+                        }
+                        
+                        VStack(alignment: .leading) {
+                            Text(Date(), format: .dateTime)
+                                .font(.caption)
+                                .foregroundStyle(.secondaryText)
+                            
+                            Text(journal.moodName)
+                                .font(.title3)
+                                .fontWeight(.medium)
+                        }
                     }
                     
-                    VStack(alignment: .leading) {
-                        Text(Date(), format: .dateTime)
-                            .font(.caption)
-                            .foregroundStyle(.secondaryText)
-                        
-                        Text("Joyful")
-                            .font(.title3)
-                            .fontWeight(.medium)
-                    }
+                    Text(journal.moodDescription)
                 }
-                
-                Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean in placerat eros. Duis dignissim nulla mi, nec commodo urna sagittis eu. Phasellus sagittis, quam at facilisis fermentum, orci orci vestibulum libero, nec condimentum leo purus vel ante. Donec a nibh non enim vehicula tristique. Sed at interdum risus.")
+            } else {
+                ContentUnavailableView("No Journal",
+                                       systemImage: "book.pages",
+                                       description: Text("You haven't log your journal today! Log it above!"))
+                .frame(height: UIScreen.main.bounds.height / 4)
             }
         }
     }
