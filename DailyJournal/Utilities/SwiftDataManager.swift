@@ -21,16 +21,27 @@ class SwiftDataManager {
         }
     }
     
+    func fetchAll<T: PersistentModel>(context: ModelContext,
+                                      predicate: Predicate<T>) -> [T] {
+        do {
+            let descriptor = FetchDescriptor<T>(predicate: predicate)
+            return try context.fetch(descriptor)
+        } catch {
+            print("❌ Failed to fetch data: \(error)")
+            return []
+        }
+    }
+    
     func fetchOne<T: PersistentModel>(context: ModelContext,
                                       predicate: Predicate<T>) -> T? {
-            do {
-                let descriptor = FetchDescriptor<T>(predicate: predicate)
-                return try context.fetch(descriptor).first
-            } catch {
-                print("❌ Failed to fetch data: \(error)")
-                return nil
-            }
+        do {
+            let descriptor = FetchDescriptor<T>(predicate: predicate)
+            return try context.fetch(descriptor).first
+        } catch {
+            print("❌ Failed to fetch data: \(error)")
+            return nil
         }
+    }
     
     func updateItem(context: ModelContext, action: (() -> Void)?) {
         action?()

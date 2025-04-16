@@ -18,6 +18,7 @@ struct ContentView: View {
     @Environment(\.modelContext) var modelContext
     
     @State private var journal: Journal?
+    @State private var weeklyJournals: [Journal] = []
     private let moods = MoodData.moods
     
     init(username: Binding<String>) {
@@ -30,41 +31,47 @@ struct ContentView: View {
                 .ignoresSafeArea()
             
             NavigationStack {
-                VStack(alignment: .leading) {
-                    HStack {
-                        Image(uiImage: .strokedCheckmark)
-                            .resizable()
-                            .frame(width: 70, height: 70)
+                ScrollView {
+                    VStack(alignment: .leading) {
+                        HStack {
+                            Image(uiImage: .strokedCheckmark)
+                                .resizable()
+                                .frame(width: 70, height: 70)
+                                .padding(.bottom)
+                            
+                            Spacer()
+                        }
+                        
+                        Text("Welcome, ")
+                            .font(.headline)
+                            
+                        Text(username)
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundStyle(Color(.primary))
+                            .padding(.bottom, Constant.paddingBottom)
+                        
+                        if !hideMoodView {
+                            MoodView(selectedIndex: $selectedIndex,
+                                     shouldNavigate: $shouldNavigate)
+                                .padding(.bottom, Constant.paddingBottom)
+                        }
+                        
+                        TodayJournalView(journal: journal)
                             .padding(.bottom)
+                        
+                        WeeklyJournalView(weeklyJournals: weeklyJournals)
                         
                         Spacer()
                     }
-                    
-                    Text("Welcome, ")
-                        .font(.headline)
-                        
-                    Text(username)
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .foregroundStyle(Color(.primary))
-                        .padding(.bottom, Constant.paddingBottom)
-                    
-                    if !hideMoodView {
-                        MoodView(selectedIndex: $selectedIndex,
-                                 shouldNavigate: $shouldNavigate)
-                            .padding(.bottom, Constant.paddingBottom)
-                    }
-                    
-                    TodayJournalView(journal: journal)
-                    
-                    Spacer()
+                    .padding()
                 }
-                .padding()
             }
             .navigationBarBackButtonHidden()
         }
         .fullScreenCover(isPresented: $shouldNavigate) {
             getTodayJournal()
+            getWeeklyJournal()
         } content: {
             JournalLogView(mood: moods[selectedIndex].image,
                            moodString: moods[selectedIndex].mood,
@@ -72,7 +79,19 @@ struct ContentView: View {
         }
         .onAppear {
             getTodayJournal()
+            getWeeklyJournal()
         }
+    }
+    
+    func getWeeklyJournal() {
+        let calendar = Calendar(identifier: .gregorian)
+        let startOfWeek = Date().startOfWeek(using: calendar)
+        let startOfNextWeek = calendar.date(byAdding: .day, value: 7, to: startOfWeek)!
+        let predicate = #Predicate<Journal> {
+            $0.date >= startOfWeek && $0.date < startOfNextWeek
+        }
+        
+        weeklyJournals = SwiftDataManager.shared.fetchAll(context: modelContext, predicate: predicate)
     }
     
     func getTodayJournal() {

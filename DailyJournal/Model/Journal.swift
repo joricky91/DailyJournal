@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftData
+import UIKit
 
 @Model
 final class Journal {
@@ -14,6 +15,10 @@ final class Journal {
     var moodName: String
     var moodDescription: String
     var date: Date
+    
+    func getImage() -> UIImage {
+        return mood.emojiToImage() ?? UIImage()
+    }
     
     init(mood: String, moodName: String, moodDescription: String, date: Date) {
         self.mood = mood
